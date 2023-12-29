@@ -12,7 +12,6 @@
     IR007_0,
     OR007@3_0
 '''
-'''共?樣本 分成訓練集 測試集 驗證集'''
 
 from tensorflow_core.python.keras.models import Sequential
 from tensorflow_core.python.keras.layers import Dense, Conv1D, Dropout, Reshape
@@ -31,6 +30,7 @@ import scipy.io as spio
 from matplotlib import pyplot as plt
 from sklearn.metrics import confusion_matrix
 from sklearn.manifold import TSNE
+from sklearn.model_selection import train_test_split 
 import time
 
 #start_time = time.time()
@@ -61,7 +61,7 @@ def t_sne():
     pass
 
 '''讀取資料路徑'''
-def read_data(path):
+def read_data(path:str):
     data = spio.loadmat(path)
     data = {k:v for k, v in data.items() if k[0] != '_'} #去除'_'開頭
     return data
@@ -75,21 +75,26 @@ train_ratio = 0.8
 val_ratio = 0.1
 
 '''資料前處理'''
-X = []
-y = []
-def preprocess(data_list: list, num_samples=100):
-    #建立標籤(labels)X: 0, 1, 2, 3
-    #與data y
+
+def preprocess(data_list:list, num_samples=100):
     #標準化?
     #歸一化: 將數據限制在小範圍，可以幫助快速收斂，提升模型性能
+   
+    ##打亂資料
+  
+
     #合併資料
-    #打亂資料
     subset_data_list = []
     for data in data_list:
         subset_data = data[:num_samples]
         subset_data_list.append(subset_data)
     combined_data = np.concatenate((subset_data_list), axis=0)
-    return combined_data
+    X = np.array(combined_data) #X: 特徵資料
+    y = np.array([0, 1, 2, 3]) #y: 標籤
+    #拆分資料 20%測試集 80%訓練集
+    X_train, y_train, X_test, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+    return X_train, y_train, X_test, y_test
+
 
 '''模型建構'''
 TIME_PERIODS = 6000
@@ -129,6 +134,6 @@ OR_data = read_data(path_12kDE+OR007_0)['X144_DE_time'].transpose()[0]
 
 all_data_list = [NO_data, B_data, IR_data, OR_data]
 
-preprocess(all_data_list)
+combined_data = preprocess(all_data_list) 
 
 #取前?筆資料 打亂順序 合併
