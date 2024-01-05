@@ -2,6 +2,7 @@
 import numpy as np
 import os
 import scipy.io as spio
+from sklearn.model_selection import train_test_split 
 
 '''讀取資料路徑'''
 def read_data(path):
@@ -13,9 +14,12 @@ def preprocess(data_list: list, num_samples=100):
     subset_data_list = []
     for data in data_list:
         subset_data = data[:num_samples]
-        subset_data_list.append(subset_data)
+        subset_data_list.append([subset_data])
     combined_data = np.concatenate((subset_data_list), axis=0)
     return combined_data
+  
+
+
 
 path_Normal = 'CWRU_data/Data/Normal/'
 path_12kDE = 'CWRU_data/Data/12k_DE/'
@@ -32,3 +36,18 @@ OR_data = read_data(path_12kDE+OR007_0)['X144_DE_time'].transpose()[0]
 all_data_list = [NO_data, B_data, IR_data, OR_data]
 
 combined_data = preprocess(all_data_list)
+X = np.array(combined_data) #X: 特徵資料
+y = np.array([0, 1, 2, 3]) #y: 標籤
+
+indices = np.arange(X.shape[0])
+np.random.shuffle(indices)
+X_shuffled = X[indices]
+y_shuffled = y[indices]
+
+#拆分資料 訓練集:測試集=8:2
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+
+
+
+
+
